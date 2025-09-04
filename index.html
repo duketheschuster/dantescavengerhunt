@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dante Scavenger Hunt: Journey Through Medieval Florence</title>
+  <meta name="description" content="Interactive Dante scavenger hunt organizer with progress tracking, teacher unlock, and local-only saving via browser storage.">
+  <style>
+    /* ===== Base Reset ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    /* ===== Theme ===== */
+    body {
+      font-family: "Georgia", serif;
+      background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #CD853F 70%, #F4A460 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #2F1B14;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: rgba(255, 248, 240, 0.95);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      border: 3px solid #8B4513;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #8B4513;
+      padding-bottom: 20px;
+    }
+    .header h1 {
+      color: #8B4513;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .header p { font-size: 1.2em; color: #654321; font-style: italic; }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 16px 0 28px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      appearance: none;
+      border: 2px solid #8B4513;
+      background: #DEB887;
+      color: #2F1B14;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); background: #E6C49A; border-color: #6F3D11; }
+
+    /* Team info */
+    .team-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: rgba(139, 69, 19, 0.1);
+      border-radius: 10px;
+      border: 2px solid #CD853F;
+    }
+    .team-info label { display: block; font-weight: 700; margin-bottom: 6px; color: #6F3D11; }
+    .team-info input {
+      padding: 10px;
+      border: 2px solid #8B4513;
+      border-radius: 5px;
+      font-size: 16px;
+      background: rgba(255, 248, 240, 0.9);
+      width: 100%;
+    }
+
+    /* Progress */
+    .progress-section { margin-bottom: 30px; text-align: center; }
+    .progress-bar {
+      width: 100%;
+      height: 25px;
+      background: #DEB887;
+      border-radius: 15px;
+      margin: 15px 0;
+      border: 2px solid #8B4513;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #228B22, #32CD32);
+      border-radius: 13px;
+      transition: width 0.5s ease;
+      width: 0%;
+      position: relative;
+    }
+    .progress-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+    /* Realms */
+    .realms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-bottom: 30px; }
+    .realm {
+      background: rgba(255, 248, 240, 0.9);
+      border: 3px solid #CD853F;
+      border-radius: 15px;
+      padding: 25px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .realm::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, #8B4513, #CD853F, #D2691E); }
+    .realm.completed { border-color: #228B22; background: rgba(240, 255, 240, 0.9); transform: scale(1.02); box-shadow: 0 10px 25px rgba(34, 139, 34, 0.3); }
+    .realm.completed::before { background: linear-gradient(90deg, #228B22, #32CD32, #90EE90); }
+
+    .realm-header { display: flex; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #DEB887; }
+    .realm-number { width: 50px; height: 50px; border-radius: 50%; background: #8B4513; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: 700; margin-right: 15px; border: 3px solid #CD853F; }
+    .realm.completed .realm-number { background: #228B22; border-color: #32CD32; }
+    .realm-title { flex: 1; }
+    .realm-title h3 { color: #8B4513; font-size: 1.4em; margin-bottom: 5px; }
+    .realm-title p { color: #654321; font-style: italic; font-size: 0.9em; }
+    .completion-badge { width: 40px; height: 40px; border-radius: 50%; background: #228B22; color: #fff; display: none; align-items: center; justify-content: center; font-size: 1.5em; margin-left: 10px; animation: bounce 0.6s ease; }
+    .realm.completed .completion-badge { display: flex; }
+    @keyframes bounce { 0%,20%,50%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-10px)} 60%{transform:translateY(-5px)} }
+
+    .tasks-list { margin-bottom: 20px; }
+    .task { display: flex; align-items: flex-start; margin-bottom: 15px; padding: 12px; background: rgba(222,184,135,0.2); border-radius: 8px; border-left: 4px solid #CD853F; transition: all 0.3s ease; }
+    .task.completed { background: rgba(144,238,144,0.3); border-left-color: #228B22; }
+    .task-checkbox { width: 20px; height: 20px; border: 2px solid #8B4513; border-radius: 4px; margin-right: 12px; margin-top: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0; }
+    .task-checkbox:hover { border-color: #228B22; transform: scale(1.1); }
+    .task-checkbox.checked { background: #228B22; border-color: #228B22; color: #fff; }
+    .task-checkbox.checked::after { content: "✓"; font-weight: 700; font-size: 14px; }
+    .task-content { flex: 1; }
+    .task-title { font-weight: 700; color: #8B4513; margin-bottom: 5px; }
+    .task.completed .task-title { color: #228B22; }
+    .task-description { font-size: 0.9em; color: #654321; line-height: 1.4; }
+
+    .evidence-section { margin-top: 15px; padding: 15px; background: rgba(139, 69, 19, 0.05); border-radius: 8px; border: 1px dashed #CD853F; }
+    .evidence-section h4 { color: #8B4513; margin-bottom: 10px; font-size: 1em; }
+    .evidence-input { width: 100%; min-height: 80px; padding: 10px; border: 2px solid #CD853F; border-radius: 5px; resize: vertical; font-family: inherit; font-size: 14px; background: rgba(255, 248, 240, 0.9); }
+    .evidence-input:focus { outline: none; border-color: #8B4513; box-shadow: 0 0 5px rgba(139, 69, 19, 0.3); }
+
+    /* Puzzle */
+    .puzzle-section { margin-top: 30px; padding: 25px; background: rgba(139, 69, 19, 0.1); border: 3px solid #8B4513; border-radius: 15px; text-align: center; opacity: 0.5; transition: all 0.5s ease; }
+    .puzzle-section.unlocked { opacity: 1; background: rgba(34,139,34,0.1); border-color: #228B22; }
+    .locked-message { color: #8B4513; font-style: italic; margin-bottom: 20px; }
+
+    .puzzle-grid { display: grid; grid-template-columns: repeat(3, 150px); grid-template-rows: repeat(2, 150px); gap: 10px; justify-content: center; margin: 20px 0; }
+    .puzzle-piece { border: 3px solid #8B4513; border-radius: 10px; background: rgba(222,184,135,0.8); display: flex; align-items: center; justify-content: center; font-size: 12px; text-align: center; padding: 10px; color: #8B4513; font-weight: 700; cursor: move; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .puzzle-piece.unlocked { border-color: #228B22; background: rgba(144,238,144,0.8); color: #228B22; animation: glow 2s infinite alternate; }
+    @keyframes glow { from { box-shadow: 0 0 5px rgba(34,139,34,0.5); } to { box-shadow: 0 0 20px rgba(34,139,34,0.8); } }
+    .puzzle-piece:hover.unlocked { transform: scale(1.05); z-index: 10; }
+
+    .revealed-quote { margin-top: 20px; padding: 20px; background: rgba(255, 215, 0, 0.2); border: 2px solid #DAA520; border-radius: 10px; font-style: italic; color: #8B4513; display: none; }
+    .revealed-quote.show { display: block; animation: fadeIn 1s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Teacher unlock */
+    .teacher-unlock { display: none; margin: 18px auto 6px; max-width: 520px; background: rgba(255, 248, 240, 0.9); border: 2px dashed #8B4513; border-radius: 12px; padding: 16px; }
+    .teacher-unlock h4 { color: #8B4513; margin-bottom: 10px; }
+    .teacher-row { display: flex; gap: 10px; align-items: center; }
+    .teacher-row input[type="password"], .teacher-row input[type="text"] { flex: 1; padding: 9px; border: 2px solid #8B4513; border-radius: 8px; background: rgba(255, 248, 240, 0.95); }
+    .error { color: #9b1c1c; margin-top: 8px; display: none; }
+
+    @media (max-width: 760px) {
+      .team-info { grid-template-columns: 1fr; }
+      .puzzle-grid { grid-template-columns: repeat(2, 150px); grid-template-rows: repeat(3, 150px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏰 Dante Scavenger Hunt 🏰</h1>
+      <p>Journey Through Medieval Florence - Interactive Quest Organizer</p>
+    </div>
+
+    <div class="controls" aria-label="Page controls">
+      <button id="reset-btn" class="btn" type="button">Reset Progress</button>
+    </div>
+
+    <section class="team-info" aria-labelledby="team-info-heading">
+      <h2 id="team-info-heading" class="sr-only" style="position:absolute;left:-10000px;">Team Information</h2>
+      <div>
+        <label for="team-name">Team Name:</label>
+        <input type="text" id="team-name" placeholder="Choose a medieval Florence-inspired name..." autocomplete="off" />
+      </div>
+      <div>
+        <label for="team-members">Team Members:</label>
+        <input type="text" id="team-members" placeholder="Enter names of 3-4 team members..." autocomplete="off" />
+      </div>
+    </section>
+
+    <section class="progress-section" aria-live="polite">
+      <h3>Quest Progress</h3>
+      <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Completion percentage">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <p id="progress-text">0 of 6 Realms Completed</p>
+    </section>
+
+    <div class="realms-grid">
+      <!-- ===== Realm 1 ===== -->
+      <div class="realm" data-realm="1">
+        <div class="realm-header">
+          <div class="realm-number">1</div>
+          <div class="realm-title">
+            <h3>Political Exile</h3>
+            <p>Uncover the truth behind Dante's banishment</p>
+          </div>
+          <div class="completion-badge" aria-hidden="true">✓</div>
+        </div>
+        <div class="tasks-list">
+          <div class="task">
+            <div class="task-checkbox" data-task="1-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Chronicle Fragment Hunt"></div>
+            <div class="task-content">
+              <div class="task-title">Chronicle Fragment Hunt</div>
+              <div class="task-description">Find and arrange 3 chronicle excerpts chronologically to reveal Charles of Valois's real mission</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="1-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Faction Badge Investigation"></div>
+            <div class="task-content">
+              <div class="task-title">Faction Badge Investigation</div>
+              <div class="task-description">Locate White/Black Guelph badges and create political relationships chart</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="1-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Papal Authority Analysis"></div>
+            <div class="task-content">
+              <div class="task-title">Papal Authority Analysis</div>
+              <div class="task-description">Analyze Pope Boniface VIII's "Unam Sanctam" and connect to Dante's opposition</div>
+            </div>
+          </div>
+        </div>
+        <div class="evidence-section">
+          <h4>📜 Political Web Diagram Evidence:</h4>
+          <textarea class="evidence-input" placeholder="Record your findings about who sent Charles of Valois, why White Guelphs opposed papal power, and how personal exile becomes universal justice theme..."></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Realm 2 ===== -->
+      <div class="realm" data-realm="2">
+        <div class="realm-header">
+          <div class="realm-number">2</div>
+          <div class="realm-title">
+            <h3>Scholastic Philosophy</h3>
+            <p>Master Hell's philosophical architecture</p>
+          </div>
+          <div class="completion-badge" aria-hidden="true">✓</div>
+        </div>
+        <div class="tasks-list">
+          <div class="task">
+            <div class="task-checkbox" data-task="2-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Aquinas Fragment Assembly"></div>
+            <div class="task-content">
+              <div class="task-title">Aquinas Fragment Assembly</div>
+              <div class="task-description">Hunt for 5 scattered Aquinas quotes about sin/free will and arrange logically</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="2-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Aristotelian Ethics Mapping"></div>
+            <div class="task-content">
+              <div class="task-title">Aristotelian Ethics Mapping</div>
+              <div class="task-description">Create virtue/vice spectrum and plot 6 Dante sins onto philosophical framework</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="2-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Augustine's Chain Analysis"></div>
+            <div class="task-content">
+              <div class="task-title">Augustine's Chain Analysis</div>
+              <div class="task-description">Decode Augustine's "bound by chains of will" metaphor and connect to Hell's punishments</div>
+            </div>
+          </div>
+        </div>
+        <div class="evidence-section">
+          <h4>🏛️ Hell's Architecture Chart Evidence:</h4>
+          <textarea class="evidence-input" placeholder="Explain how Aquinas philosophy shows soul responsibility, why fraud > violence, and how Augustine's moral bondage explains eternal punishment..."></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Realm 3 ===== -->
+      <div class="realm" data-realm="3">
+        <div class="realm-header">
+          <div class="realm-number">3</div>
+          <div class="realm-title">
+            <h3>Cosmic Justice</h3>
+            <p>Decode Dante's moral architecture</p>
+          </div>
+          <div class="completion-badge" aria-hidden="true">✓</div>
+        </div>
+        <div class="tasks-list">
+          <div class="task">
+            <div class="task-checkbox" data-task="3-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Modern Contrapasso Design"></div>
+            <div class="task-content">
+              <div class="task-title">Modern Contrapasso Design</div>
+              <div class="task-description">Design appropriate Dantean punishments for 6 modern ethical scenarios using mirror/contrast principle</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="3-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Sin Classification Challenge"></div>
+            <div class="task-content">
+              <div class="task-title">Sin Classification Challenge</div>
+              <div class="task-description">Sort 15 sin cards into Incontinence/Violence/Fraud categories and find the exception</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="3-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Medieval Court Simulation"></div>
+            <div class="task-content">
+              <div class="task-title">Medieval Court Simulation</div>
+              <div class="task-description">Use Gratian's legal principles to prosecute sinners and compare divine vs human justice</div>
+            </div>
+          </div>
+        </div>
+        <div class="evidence-section">
+          <h4>⚖️ Contrapasso Design Portfolio Evidence:</h4>
+          <textarea class="evidence-input" placeholder="Record your 6 modern scenarios with medieval-style punishments, sin classifications, and understanding of perfect divine justice..."></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Realm 4 ===== -->
+      <div class="realm" data-realm="4">
+        <div class="realm-header">
+          <div class="realm-number">4</div>
+          <div class="realm-title">
+            <h3>Literary Echoes</h3>
+            <p>Trace Dante's literary DNA</p>
+          </div>
+          <div class="completion-badge" aria-hidden="true">✓</div>
+        </div>
+        <div class="tasks-list">
+          <div class="task">
+            <div class="task-checkbox" data-task="4-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Virgil Connection Mapping"></div>
+            <div class="task-content">
+              <div class="task-title">Virgil Connection Mapping</div>
+              <div class="task-description">Compare Aeneid Book VI with Dante's Hell - find 5 parallels and 3 differences</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="4-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Courtly Love Evolution Tracking"></div>
+            <div class="task-content">
+              <div class="task-title">Courtly Love Evolution Tracking</div>
+              <div class="task-description">Trace how Dante transforms earthly love (Beatrice) into spiritual guidance</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="4-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Biblical Typology Hunt"></div>
+            <div class="task-content">
+              <div class="task-title">Biblical Typology Hunt</div>
+              <div class="task-description">Match biblical references to Dante's journey moments creating parallel salvation narratives</div>
+            </div>
+          </div>
+        </div>
+        <div class="evidence-section">
+          <h4>📚 Literary Influence Map Evidence:</h4>
+          <textarea class="evidence-input" placeholder="Document how Dante adapts classical epic traditions, transforms courtly love, uses biblical typology, and why his synthesis was revolutionary..."></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Realm 5 ===== -->
+      <div class="realm" data-realm="5">
+        <div class="realm-header">
+          <div class="realm-number">5</div>
+          <div class="realm-title">
+            <h3>Translation Laboratory</h3>
+            <p>Decode poetic craft mysteries</p>
+          </div>
+          <div class="completion-badge" aria-hidden="true">✓</div>
+        </div>
+        <div class="tasks-list">
+          <div class="task">
+            <div class="task-checkbox" data-task="5-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Translation Comparison Analysis"></div>
+            <div class="task-content">
+              <div class="task-title">Translation Comparison Analysis</div>
+              <div class="task-description">Examine Italian original + 4 English translations, vote on best with detailed justification</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="5-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Terza Rima Investigation"></div>
+            <div class="task-content">
+              <div class="task-title">Terza Rima Investigation</div>
+              <div class="task-description">Study rhyme scheme pattern and explain how interlocking rhymes create journey momentum</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="5-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Four Levels Analysis"></div>
+            <div class="task-content">
+              <div class="task-title">Four Levels Analysis</div>
+              <div class="task-description">Identify Literal/Allegorical/Moral/Anagogical meanings in complex Inferno passage</div>
+            </div>
+          </div>
+        </div>
+        <div class="evidence-section">
+          <h4>✍️ Poetic Innovation Portfolio Evidence:</h4>
+          <textarea class="evidence-input" placeholder="Record translation comparison with reasoned judgment, symbol dictionary with 10 examples, four-level analysis, and vernacular revolution understanding..."></textarea>
+        </div>
+      </div>
+
+      <!-- ===== Realm 6 ===== -->
+      <div class="realm" data-realm="6">
+        <div class="realm-header">
+          <div class="realm-number">6</div>
+          <div class="realm-title">
+            <h3>Scholar's Archive</h3>
+            <p>Master literary investigation art</p>
+          </div>
+          <div class="completion-badge" aria-hidden="true">✓</div>
+        </div>
+        <div class="tasks-list">
+          <div class="task">
+            <div class="task-checkbox" data-task="6-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Source Reliability Assessment"></div>
+            <div class="task-content">
+              <div class="task-title">Source Reliability Assessment</div>
+              <div class="task-description">Sort 12 sources into Primary/Secondary, rank reliability, identify bias without dismissing</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="6-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Conflicting Evidence Analysis"></div>
+            <div class="task-content">
+              <div class="task-title">Conflicting Evidence Analysis</div>
+              <div class="task-description">Compare 3 characterizations of Pope Boniface VIII and find scholarly middle ground</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-checkbox" data-task="6-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Research Question Development"></div>
+            <div class="task-content">
+              <div class="task-title">Research Question Development</div>
+              <div class="task-description">Formulate original, complex question connecting medieval themes to contemporary issues</div>
+            </div>
+          </div>
+        </div>
+        <div class="evidence-section">
+          <h4>🔍 Research Portfolio Evidence:</h4>
+          <textarea class="evidence-input" placeholder="Document source evaluation with reliability rankings, bias analysis, conflicting evidence reconciliation, and original research question with supporting evidence map..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Master Puzzle ===== -->
+    <section class="puzzle-section" id="puzzle-section">
+      <h3>🧩 Master Puzzle Assembly</h3>
+      <div class="locked-message" id="locked-message">Complete all 6 realms to unlock the puzzle revealing Dante's famous opening lines!</div>
+
+      <div id="teacher-unlock-section" class="teacher-unlock" aria-live="polite">
+        <h4>Teacher Verification</h4>
+        <div class="teacher-row">
+          <label for="teacher-password" style="display:none">Teacher Password</label>
+          <input type="password" id="teacher-password" placeholder="Enter password to unlock puzzle" autocomplete="off" />
+          <button id="unlock-puzzle-btn" class="btn" type="button">Unlock Puzzle</button>
+        </div>
+        <div id="password-error" class="error">Incorrect password. Try again.</div>
+      </div>
+
+      <div class="puzzle-grid" id="puzzle-grid">
+        <div class="puzzle-piece" data-piece="1"><div>Political Exile<br>"Nel mezzo del cammin"</div></div>
+        <div class="puzzle-piece" data-piece="2"><div>Philosophy<br>"di nostra vita"</div></div>
+        <div class="puzzle-piece" data-piece="3"><div>Cosmic Justice<br>"mi ritrovai per una"</div></div>
+        <div class="puzzle-piece" data-piece="4"><div>Literary Echoes<br>"selva oscura"</div></div>
+        <div class="puzzle-piece" data-piece="5"><div>Translation Lab<br>"ché la diritta via"</div></div>
+        <div class="puzzle-piece" data-piece="6"><div>Scholar's Archive<br>"era smarrita"</div></div>
+      </div>
+
+      <div class="revealed-quote" id="revealed-quote">
+        <div class="italian-quote">
+          "Nel mezzo del cammin di nostra vita<br />
+          mi ritrovai per una selva oscura,<nobr></nobr><br />
+          ché la diritta via era smarrita."
+        </div>
+        <div class="english-quote">
+          "Midway upon the journey of our life<br />
+          I found myself within a forest dark,<br />
+          For the straightforward pathway had been lost."
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ===== Local Storage Key =====
+    const STORAGE_KEY = "danteScavenger_v1"; // bump suffix when you change structure
+
+    // ===== In-memory game state (derived from DOM + storage) =====
+    const gameState = {
+      completedRealms: new Set(),
+      puzzleUnlocked: false,
+    };
+
+    // ===== Helpers: Save/Load =====
+    function saveState() {
+      const state = {
+        teamName: document.getElementById("team-name").value || "",
+        teamMembers: document.getElementById("team-members").value || "",
+        tasks: {},
+        evidence: {},
+        puzzleUnlocked: gameState.puzzleUnlocked,
+      };
+      document.querySelectorAll(".task-checkbox").forEach((cb) => {
+        state.tasks[cb.dataset.task] = cb.classList.contains("checked");
+      });
+      document.querySelectorAll(".realm").forEach((realm) => {
+        const num = realm.dataset.realm;
+        const ta = realm.querySelector(".evidence-input");
+        state.evidence[num] = ta ? ta.value : "";
+      });
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.warn("Save failed:", e); }
+    }
+
+    function loadState() {
+      let state = null;
+      try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch {}
+      if (!state) return;
+
+      // Restore team meta
+      document.getElementById("team-name").value = state.teamName || "";
+      document.getElementById("team-members").value = state.teamMembers || "";
+
+      // Restore tasks
+      document.querySelectorAll(".task-checkbox").forEach((cb) => {
+        const checked = state.tasks && state.tasks[cb.dataset.task];
+        if (checked) {
+          cb.classList.add("checked");
+          cb.setAttribute("aria-checked", "true");
+          cb.closest(".task").classList.add("completed");
+        } else {
+          cb.classList.remove("checked");
+          cb.setAttribute("aria-checked", "false");
+          cb.closest(".task").classList.remove("completed");
+        }
+      });
+
+      // Restore evidence textareas
+      document.querySelectorAll(".realm").forEach((realm) => {
+        const num = realm.dataset.realm;
+        const ta = realm.querySelector(".evidence-input");
+        if (ta && state.evidence && typeof state.evidence[num] === "string") {
+          ta.value = state.evidence[num];
+        }
+      });
+
+      if (state.puzzleUnlocked) {
+        unlockPuzzle();
+        const locked = document.getElementById("locked-message");
+        if (locked) locked.textContent = "Teacher verification complete! The puzzle pieces are now unlocked.";
+        const teach = document.getElementById("teacher-unlock-section");
+        if (teach) teach.style.display = "none";
+      }
+    }
+
+    // ===== Realm + Progress =====
+    function checkRealmCompletion() {
+      document.querySelectorAll(".realm").forEach((realm) => {
+        const realmNumber = realm.getAttribute("data-realm");
+        const tasks = realm.querySelectorAll(".task-checkbox");
+        const completedTasks = realm.querySelectorAll(".task-checkbox.checked");
+        const evidenceInput = realm.querySelector(".evidence-input");
+        const hasEvidence = evidenceInput && evidenceInput.value.trim().length > 0;
+
+        if (tasks.length > 0 && completedTasks.length === tasks.length && hasEvidence) {
+          realm.classList.add("completed");
+          gameState.completedRealms.add(realmNumber);
+        } else {
+          realm.classList.remove("completed");
+          gameState.completedRealms.delete(realmNumber);
+        }
+      });
+    }
+
+    function updateProgress() {
+      const totalRealms = 6;
+      const completed = gameState.completedRealms.size;
+      const percentage = (completed / totalRealms) * 100;
+      const bar = document.getElementById("progress-fill");
+      const text = document.getElementById("progress-text");
+      if (bar) bar.style.width = percentage + "%";
+      if (text) text.textContent = `${completed} of ${totalRealms} Realms Completed`;
+
+      const progressBar = document.querySelector('.progress-bar');
+      if (progressBar) progressBar.setAttribute('aria-valuenow', Math.round(percentage));
+    }
+
+    // ===== Puzzle Unlock Flow =====
+    function showTeacherUnlock() {
+      const puzzleSection = document.getElementById("puzzle-section");
+      const lockedMessage = document.getElementById("locked-message");
+      const teacherSection = document.getElementById("teacher-unlock-section");
+      if (puzzleSection) puzzleSection.classList.add("unlocked");
+      if (lockedMessage) lockedMessage.textContent = "All realms completed! Present your evidence to your teacher.";
+      if (teacherSection) teacherSection.style.display = "block";
+    }
+
+    function unlockPuzzle() {
+      const puzzlePieces = document.querySelectorAll('.puzzle-piece');
+      const revealedQuote = document.getElementById('revealed-quote');
+      puzzlePieces.forEach((piece) => {
+        piece.classList.add('unlocked');
+        piece.addEventListener('click', () => {
+          if (gameState.puzzleUnlocked && revealedQuote) {
+            revealedQuote.classList.add('show');
+          }
+        });
+      });
+      gameState.puzzleUnlocked = true;
+      // Auto-reveal quote after a short delay
+      setTimeout(() => { if (revealedQuote) revealedQuote.classList.add('show'); }, 800);
+    }
+
+    function checkPuzzleUnlock() {
+      if (gameState.completedRealms.size === 6 && !gameState.puzzleUnlocked) {
+        showTeacherUnlock();
+      }
+    }
+
+    // ===== Accessible toggle for checkboxes (click + Enter/Space) =====
+    function toggleTaskCheckbox(el) {
+      const isChecked = el.classList.toggle('checked');
+      el.setAttribute('aria-checked', isChecked ? 'true' : 'false');
+      const task = el.closest('.task');
+      if (task) task.classList.toggle('completed', isChecked);
+    }
+
+    // ===== Boot =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Attach handlers to tasks
+      document.querySelectorAll('.task-checkbox').forEach((checkbox) => {
+        checkbox.addEventListener('click', () => {
+          toggleTaskCheckbox(checkbox);
+          checkRealmCompletion();
+          updateProgress();
+          checkPuzzleUnlock();
+          saveState();
+        });
+        checkbox.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleTaskCheckbox(checkbox);
+            checkRealmCompletion();
+            updateProgress();
+            checkPuzzleUnlock();
+            saveState();
+          }
+        });
+      });
+
+      // Evidence inputs + team meta
+      document.querySelectorAll('.evidence-input').forEach((ta) => {
+        ta.addEventListener('input', () => {
+          checkRealmCompletion();
+          updateProgress();
+          checkPuzzleUnlock();
+          saveState();
+        });
+      });
+      const teamName = document.getElementById('team-name');
+      const teamMembers = document.getElementById('team-members');
+      if (teamName) teamName.addEventListener('input', saveState);
+      if (teamMembers) teamMembers.addEventListener('input', saveState);
+
+      // Teacher password
+      const passwordInput = document.getElementById('teacher-password');
+      const unlockBtn = document.getElementById('unlock-puzzle-btn');
+      const errorMsg = document.getElementById('password-error');
+      const teacherSection = document.getElementById('teacher-unlock-section');
+
+      function verifyPassword() {
+        const password = (passwordInput?.value || '').trim().toLowerCase();
+        // NOTE: Change this string to update the password.
+        if (password === 'virgil') {
+          if (teacherSection) teacherSection.style.display = 'none';
+          const locked = document.getElementById('locked-message');
+          if (locked) locked.textContent = 'Teacher verification complete! The puzzle pieces are now unlocked.';
+          unlockPuzzle();
+          if (errorMsg) errorMsg.style.display = 'none';
+          saveState();
+        } else {
+          if (errorMsg) errorMsg.style.display = 'block';
+          if (passwordInput) { passwordInput.value = ''; passwordInput.focus(); }
+        }
+      }
+      if (unlockBtn) unlockBtn.addEventListener('click', verifyPassword);
+      if (passwordInput) passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyPassword(); });
+
+      // Reset all progress
+      const resetBtn = document.getElementById('reset-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          if (confirm('Clear all saved progress? This cannot be undone.')) {
+            try { localStorage.removeItem(STORAGE_KEY); } catch {}
+            location.reload();
+          }
+        });
+      }
+
+      // Initial hydration
+      loadState();
+      checkRealmCompletion();
+      updateProgress();
+      checkPuzzleUnlock();
+    });
+  </script>
+</body>
+</html>
