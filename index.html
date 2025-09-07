@@ -797,5 +797,88 @@
       checkPuzzleUnlock();
     });
   </script>
+<script>
+// ===== Emergency UI & Persistence Patch (Chrome-friendly) =====
+(function(){
+  const KEY = 'danteScavenger_v1';
+  function getStateFromDOM(){
+    const tasks = {};
+    document.querySelectorAll('.task-checkbox').forEach(cb=>{ tasks[cb.dataset.task] = !!cb.checked; });
+    const evidence = {};
+    document.querySelectorAll('.realm').forEach(realm=>{
+      const num = realm.dataset.realm;
+      const ta = realm.querySelector('.evidence-input');
+      evidence[num] = ta ? ta.value : '';
+    });
+    const puzzleUnlocked = !!document.getElementById('puzzle-section')?.classList.contains('unlocked') || !!window.__puzzleUnlocked;
+    return {
+      teamName: document.getElementById('team-name')?.value || '',
+      teamMembers: document.getElementById('team-members')?.value || '',
+      tasks, evidence, puzzleUnlocked
+    };
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(getStateFromDOM())); }catch(e){ console.warn('Save failed', e); const w=document.getElementById('storage-warning'); if(w) w.style.display='block'; } }
+  function apply(state){
+    if(!state) return;
+    const tn=document.getElementById('team-name'); if(tn) tn.value = state.teamName || '';
+    const tm=document.getElementById('team-members'); if(tm) tm.value = state.teamMembers || '';
+    document.querySelectorAll('.task-checkbox').forEach(cb=>{
+      const checked = !!(state.tasks && state.tasks[cb.dataset.task]);
+      cb.checked = checked;
+    });
+    document.querySelectorAll('.realm').forEach(realm=>{
+      const num = realm.dataset.realm;
+      const ta = realm.querySelector('.evidence-input');
+      if(ta && state.evidence && typeof state.evidence[num]==='string') ta.value = state.evidence[num];
+    });
+    if(state.puzzleUnlocked){
+      if (typeof unlockPuzzle === 'function') unlockPuzzle();
+      window.__puzzleUnlocked = true;
+      const teach = document.getElementById('teacher-unlock-section'); if (teach) teach.style.display='none';
+      const locked = document.getElementById('locked-message'); if (locked) locked.textContent = 'Teacher verification complete! The puzzle pieces are now unlocked.';
+    }
+  }
+  function realmComplete(realm){
+    const tasks = realm.querySelectorAll('.task-checkbox');
+    const completed = realm.querySelectorAll('.task-checkbox:checked');
+    const ta = realm.querySelector('.evidence-input');
+    const hasEv = !!ta && ta.value.trim().length>0;
+    return tasks.length>0 && completed.length===tasks.length && hasEv;
+  }
+  function refresh(){
+    document.querySelectorAll('.realm').forEach(realm=>{
+      realm.classList.toggle('completed', realmComplete(realm));
+    });
+    const total=6; const done=document.querySelectorAll('.realm.completed').length;
+    const bar=document.getElementById('progress-fill'); if(bar) bar.style.width = (done/total*100)+'%';
+    const txt=document.getElementById('progress-text'); if(txt) txt.textContent = `${done} of ${total} Realms Completed`;
+    const pb=document.querySelector('.progress-bar'); if(pb) pb.setAttribute('aria-valuenow', Math.round(done/total*100));
+    if(done===total && !window.__unlockShown && !window.__puzzleUnlocked){
+      window.__unlockShown = true;
+      const puzzleSection = document.getElementById('puzzle-section'); if (puzzleSection) puzzleSection.classList.add('unlocked');
+      const teach = document.getElementById('teacher-unlock-section'); if (teach && getComputedStyle(teach).display==='none') teach.style.display='block';
+      const locked = document.getElementById('locked-message'); if (locked) locked.textContent = 'All realms completed! Present your evidence to your teacher.';
+    }
+  }
+  function boot(){
+    try{ apply(JSON.parse(localStorage.getItem(KEY) || 'null')); }catch(e){}
+    refresh();
+    document.querySelectorAll('.task-checkbox').forEach(cb=>{
+      cb.addEventListener('change', ()=>{ const t = cb.closest('.task'); if(t) t.classList.toggle('completed', cb.checked); refresh(); save(); });
+    });
+    document.querySelectorAll('.task').forEach(row=>{
+      row.addEventListener('click', (e)=>{
+        if(e.target.closest('textarea, a, button, input, select')) return;
+        const cb=row.querySelector('.task-checkbox'); if(cb){ cb.checked=!cb.checked; const t=row.closest('.task'); if(t) t.classList.toggle('completed', cb.checked); refresh(); save(); }
+      });
+    });
+    document.querySelectorAll('.evidence-input').forEach(ta=>{ ta.addEventListener('input', ()=>{ refresh(); save(); }); });
+    window.addEventListener('beforeunload', save);
+    // Periodic autosave in case beforeunload is blocked
+    setInterval(save, 5000);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
 </body>
 </html>
