@@ -186,6 +186,12 @@
       .team-info { grid-template-columns: 1fr; }
       .puzzle-grid { grid-template-columns: repeat(2, 150px); grid-template-rows: repeat(3, 150px); }
     }
+  
+
+    /* Native checkbox styling for reliability */
+    .task-checkbox { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border: 2px solid #8B4513; border-radius: 4px; margin-right: 12px; margin-top: 2px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; background: rgba(255, 248, 240, 0.95); }
+    .task-checkbox:checked { background: #228B22; border-color: #228B22; color: #fff; }
+    .task-checkbox:checked::after { content: "✓"; font-weight: 700; font-size: 14px; line-height: 1; }
   </style>
 </head>
 <body>
@@ -228,21 +234,21 @@
         </div>
         <div class="tasks-list">
           <div class="task">
-            <div class="task-checkbox" data-task="1-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Chronicle Fragment Hunt"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Chronicle Fragment Hunt</div>
               <div class="task-description">Find and arrange 3 chronicle excerpts chronologically to reveal Charles of Valois's real mission</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="1-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Faction Badge Investigation"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Faction Badge Investigation</div>
               <div class="task-description">Locate White/Black Guelph badges and create political relationships chart</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="1-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Papal Authority Analysis"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Papal Authority Analysis</div>
               <div class="task-description">Analyze Pope Boniface VIII's "Unam Sanctam" and connect to Dante's opposition</div>
@@ -267,21 +273,21 @@
         </div>
         <div class="tasks-list">
           <div class="task">
-            <div class="task-checkbox" data-task="2-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Aquinas Fragment Assembly"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Aquinas Fragment Assembly</div>
               <div class="task-description">Hunt for 5 scattered Aquinas quotes about sin/free will and arrange logically</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="2-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Aristotelian Ethics Mapping"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Aristotelian Ethics Mapping</div>
               <div class="task-description">Create virtue/vice spectrum and plot 6 Dante sins onto philosophical framework</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="2-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Augustine's Chain Analysis"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Augustine's Chain Analysis</div>
               <div class="task-description">Decode Augustine's "bound by chains of will" metaphor and connect to Hell's punishments</div>
@@ -306,21 +312,21 @@
         </div>
         <div class="tasks-list">
           <div class="task">
-            <div class="task-checkbox" data-task="3-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Modern Contrapasso Design"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Modern Contrapasso Design</div>
               <div class="task-description">Design appropriate Dantean punishments for 6 modern ethical scenarios using mirror/contrast principle</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="3-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Sin Classification Challenge"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Sin Classification Challenge</div>
               <div class="task-description">Sort 15 sin cards into Incontinence/Violence/Fraud categories and find the exception</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="3-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Medieval Court Simulation"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Medieval Court Simulation</div>
               <div class="task-description">Use Gratian's legal principles to prosecute sinners and compare divine vs human justice</div>
@@ -345,21 +351,21 @@
         </div>
         <div class="tasks-list">
           <div class="task">
-            <div class="task-checkbox" data-task="4-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Virgil Connection Mapping"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Virgil Connection Mapping</div>
               <div class="task-description">Compare Aeneid Book VI with Dante's Hell - find 5 parallels and 3 differences</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="4-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Courtly Love Evolution Tracking"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Courtly Love Evolution Tracking</div>
               <div class="task-description">Trace how Dante transforms earthly love (Beatrice) into spiritual guidance</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="4-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Biblical Typology Hunt"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Biblical Typology Hunt</div>
               <div class="task-description">Match biblical references to Dante's journey moments creating parallel salvation narratives</div>
@@ -384,21 +390,21 @@
         </div>
         <div class="tasks-list">
           <div class="task">
-            <div class="task-checkbox" data-task="5-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Translation Comparison Analysis"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Translation Comparison Analysis</div>
               <div class="task-description">Examine Italian original + 4 English translations, vote on best with detailed justification</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="5-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Terza Rima Investigation"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Terza Rima Investigation</div>
               <div class="task-description">Study rhyme scheme pattern and explain how interlocking rhymes create journey momentum</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="5-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Four Levels Analysis"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Four Levels Analysis</div>
               <div class="task-description">Identify Literal/Allegorical/Moral/Anagogical meanings in complex Inferno passage</div>
@@ -423,21 +429,21 @@
         </div>
         <div class="tasks-list">
           <div class="task">
-            <div class="task-checkbox" data-task="6-1" role="checkbox" aria-checked="false" tabindex="0" aria-label="Source Reliability Assessment"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Source Reliability Assessment</div>
               <div class="task-description">Sort 12 sources into Primary/Secondary, rank reliability, identify bias without dismissing</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="6-2" role="checkbox" aria-checked="false" tabindex="0" aria-label="Conflicting Evidence Analysis"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Conflicting Evidence Analysis</div>
               <div class="task-description">Compare 3 characterizations of Pope Boniface VIII and find scholarly middle ground</div>
             </div>
           </div>
           <div class="task">
-            <div class="task-checkbox" data-task="6-3" role="checkbox" aria-checked="false" tabindex="0" aria-label="Research Question Development"></div>
+            <input type="checkbox" class="task-checkbox"$1 />
             <div class="task-content">
               <div class="task-title">Research Question Development</div>
               <div class="task-description">Formulate original, complex question connecting medieval themes to contemporary issues</div>
@@ -514,33 +520,13 @@
         puzzleUnlocked: gameState.puzzleUnlocked,
       };
       document.querySelectorAll(".task-checkbox").forEach((cb) => {
-        state.tasks[cb.dataset.task] = cb.classList.contains("checked");
+        const checked = !!(state.tasks && state.tasks[cb.dataset.task]);
+        cb.checked = checked;
+        const t = cb.closest('.task');
+        if (t) t.classList.toggle('completed', checked);
       });
-      document.querySelectorAll(".realm").forEach((realm) => {
-        const num = realm.dataset.realm;
-        const ta = realm.querySelector(".evidence-input");
-        state.evidence[num] = ta ? ta.value : "";
-      });
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.warn("Save failed:", e); }
-    }
 
-    function loadState() {
-      let state = null;
-      try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch {}
-      if (!state) return;
-
-      // Restore team meta
-      document.getElementById("team-name").value = state.teamName || "";
-      document.getElementById("team-members").value = state.teamMembers || "";
-
-      // Restore tasks
-      document.querySelectorAll(".task-checkbox").forEach((cb) => {
-        const checked = state.tasks && state.tasks[cb.dataset.task];
-        if (checked) {
-          cb.classList.add("checked");
-          cb.setAttribute("aria-checked", "true");
-          cb.closest(".task").classList.add("completed");
-        } else {
+      } else {
           cb.classList.remove("checked");
           cb.setAttribute("aria-checked", "false");
           cb.closest(".task").classList.remove("completed");
@@ -643,7 +629,7 @@
       document.querySelectorAll(".realm").forEach((realm) => {
         const realmNumber = realm.getAttribute("data-realm");
         const tasks = realm.querySelectorAll(".task-checkbox");
-        const completedTasks = realm.querySelectorAll(".task-checkbox.checked");
+        const completedTasks = realm.querySelectorAll(".task-checkbox:checked");
         const evidenceInput = realm.querySelector(".evidence-input");
         const hasEvidence = evidenceInput && evidenceInput.value.trim().length > 0;
 
@@ -712,35 +698,32 @@
 
     // ===== Boot =====
     document.addEventListener('DOMContentLoaded', () => {
-      // Attach handlers to tasks (event delegation for reliability)
-      function handleToggleFrom(el) {
-        const box = el.closest('.task-checkbox');
-        if (!box) return;
-        toggleTaskCheckbox(box);
+      // Attach handlers to tasks (native checkbox + delegation)
+      function syncAfterToggle(cb){
+        const task = cb.closest('.task');
+        if (task) task.classList.toggle('completed', cb.checked);
         checkRealmCompletion();
         updateProgress();
         checkPuzzleUnlock();
         saveState();
       }
       document.addEventListener('click', (e) => {
-        if (e.target.closest('.task-checkbox')) {
-          handleToggleFrom(e.target);
+        const box = e.target.closest('.task-checkbox');
+        if (box) { // direct click on the checkbox
+          // browser already toggled .checked
+          syncAfterToggle(box);
         }
       });
-      document.addEventListener('keydown', (e) => {
-        if (e.target.closest('.task-checkbox') && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault();
-          handleToggleFrom(e.target);
-        }
+      document.addEventListener('change', (e) => {
+        const box = e.target.closest('.task-checkbox');
+        if (box) { syncAfterToggle(box); }
       });
-      // Also allow clicking anywhere on the task row (except controls/inputs) to toggle
+      // Click anywhere on the task row (except inputs/links) to toggle
       document.querySelectorAll('.task').forEach((row) => {
         row.addEventListener('click', (e) => {
           if (e.target.closest('textarea, a, button, input, select')) return;
-          if (!e.target.closest('.task-checkbox')) {
-            const cb = row.querySelector('.task-checkbox');
-            if (cb) handleToggleFrom(cb);
-          }
+          const cb = row.querySelector('.task-checkbox');
+          if (cb) { cb.checked = !cb.checked; syncAfterToggle(cb); }
         });
       });
 
