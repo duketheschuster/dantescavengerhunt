@@ -626,31 +626,36 @@
 
     // ===== Realm + Progress =====
     function checkRealmCompletion() {
-      document.querySelectorAll(".realm").forEach((realm) => {
-        const realmNumber = realm.getAttribute("data-realm");
-        const tasks = realm.querySelectorAll(".task-checkbox");
-        const completedTasks = realm.querySelectorAll(".task-checkbox:checked");
-        const evidenceInput = realm.querySelector(".evidence-input");
+      document.querySelectorAll('.realm').forEach((realm) => {
+        const tasks = realm.querySelectorAll('.task-checkbox');
+        const completedTasks = realm.querySelectorAll('.task-checkbox:checked');
+        const evidenceInput = realm.querySelector('.evidence-input');
         const hasEvidence = evidenceInput && evidenceInput.value.trim().length > 0;
-
-        if (tasks.length > 0 && completedTasks.length === tasks.length && hasEvidence) {
-          realm.classList.add("completed");
-          gameState.completedRealms.add(realmNumber);
-        } else {
+        const isComplete = tasks.length > 0 && completedTasks.length === tasks.length && hasEvidence;
+        realm.classList.toggle('completed', isComplete);
+      });
+    } else {
           realm.classList.remove("completed");
           gameState.completedRealms.delete(realmNumber);
         }
       });
     }
 
+    function getCompletedRealmCount(){
+      return document.querySelectorAll('.realm.completed').length;
+    }
+
     function updateProgress() {
       const totalRealms = 6;
-      const completed = gameState.completedRealms.size;
+      const completed = getCompletedRealmCount();
       const percentage = (completed / totalRealms) * 100;
-      const bar = document.getElementById("progress-fill");
-      const text = document.getElementById("progress-text");
-      if (bar) bar.style.width = percentage + "%";
+      const bar = document.getElementById('progress-fill');
+      const text = document.getElementById('progress-text');
+      if (bar) bar.style.width = percentage + '%';
       if (text) text.textContent = `${completed} of ${totalRealms} Realms Completed`;
+      const progressBar = document.querySelector('.progress-bar');
+      if (progressBar) progressBar.setAttribute('aria-valuenow', Math.round(percentage));
+    } of ${totalRealms} Realms Completed`;
 
       const progressBar = document.querySelector('.progress-bar');
       if (progressBar) progressBar.setAttribute('aria-valuenow', Math.round(percentage));
@@ -683,9 +688,12 @@
     }
 
     function checkPuzzleUnlock() {
-      if (gameState.completedRealms.size === 6 && !gameState.puzzleUnlocked) {
+      const totalRealms = 6;
+      const completed = getCompletedRealmCount();
+      if (completed === totalRealms && !gameState.puzzleUnlocked) {
         showTeacherUnlock();
       }
+    }
     }
 
     // ===== Accessible toggle for checkboxes (click + Enter/Space) =====
