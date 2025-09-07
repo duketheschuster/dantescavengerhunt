@@ -860,6 +860,21 @@
       const locked = document.getElementById('locked-message'); if (locked) locked.textContent = 'All realms completed! Present your evidence to your teacher.';
     }
   }
+  function exportJSON(){
+    const state = getStateFromDOM();
+    const ts = new Date().toISOString();
+    const team = (state.teamName || 'team').trim().replace(/[^a-z0-9-_]+/gi,'_').replace(/^_+|_+$/g,'');
+    const outObj = state; // keeping structure simple to maximize compatibility
+    outObj.__meta = { exportedAt: ts, version: '1.0' };
+    const out = JSON.stringify(outObj, null, 2);
+    const blob = new Blob([out], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `dante_scavenger_${team || 'team'}_${ts.replace(/[:.]/g,'-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
   function boot(){
     try{ apply(JSON.parse(localStorage.getItem(KEY) || 'null')); }catch(e){}
     refresh();
@@ -900,6 +915,8 @@
     document.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'teacher-password'){ e.preventDefault(); __verifyTeacher(); } });
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  // Delegated click for JSON export in case other listeners fail
+  document.addEventListener('click', (e)=>{ if (e.target && e.target.id === 'export-json-btn') { exportJSON(); }});
 })();
 </script>
 </body>
