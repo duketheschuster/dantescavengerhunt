@@ -876,6 +876,28 @@
     window.addEventListener('beforeunload', save);
     // Periodic autosave in case beforeunload is blocked
     setInterval(save, 5000);
+    // Teacher unlock (delegated, robust)
+    function __verifyTeacher(){
+      const input = document.getElementById('teacher-password');
+      const error = document.getElementById('password-error');
+      const box = document.getElementById('teacher-unlock-section');
+      const msg = document.getElementById('locked-message');
+      const pwd = (input?.value || '').trim().toLowerCase();
+      const expected = (window.__PUZZLE_PASSWORD || 'virgil');
+      if (pwd === expected){
+        if (typeof unlockPuzzle === 'function') unlockPuzzle();
+        window.__puzzleUnlocked = true;
+        if (box) box.style.display='none';
+        if (msg) msg.textContent = 'Teacher verification complete! The puzzle pieces are now unlocked.';
+        try{ const st = JSON.parse(localStorage.getItem(KEY) || 'null') || getStateFromDOM(); st.puzzleUnlocked = true; localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){}
+        if (error) error.style.display='none';
+      } else {
+        if (error) error.style.display='block';
+        if (input) { input.value=''; input.focus(); }
+      }
+    }
+    document.addEventListener('click', (e)=>{ if (e.target && e.target.id === 'unlock-puzzle-btn') { __verifyTeacher(); }});
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'teacher-password'){ e.preventDefault(); __verifyTeacher(); } });
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
