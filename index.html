@@ -62,6 +62,8 @@
       transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease;
     }
     .btn:hover { transform: translateY(-1px); background: #E6C49A; border-color: #6F3D11; }
+    /* Bottom actions */
+    .bottom-actions { text-align: center; margin-top: 28px; }
 
     /* Team info */
     .team-info {
@@ -189,7 +191,7 @@
       <p>Journey Through Medieval Florence - Interactive Quest Organizer</p>
     </div>
 
-    <section class="team-info" aria-labelledby="team-info-heading">
+        <section class="team-info" aria-labelledby="team-info-heading">
       <h2 id="team-info-heading" class="sr-only" style="position:absolute;left:-10000px;">Team Information</h2>
       <div>
         <label for="team-name">Team Name:</label>
@@ -482,6 +484,10 @@
         </div>
       </div>
     </section>
+
+    <div class="bottom-actions">
+      <button id="export-btn" class="btn" type="button">Download Your Work (.txt)</button>
+    </div>
   </div>
 
   <script>
@@ -553,6 +559,79 @@
         const teach = document.getElementById("teacher-unlock-section");
         if (teach) teach.style.display = "none";
       }
+    }
+
+    // ===== Export/Download =====
+    function exportStateToFile() {
+      // Ensure latest data is saved first
+      saveState();
+
+      const now = new Date();
+      const ts = now.toISOString();
+      const teamName = (document.getElementById('team-name')?.value || '').trim();
+      const teamMembers = (document.getElementById('team-members')?.value || '').trim();
+      const safeTeam = teamName.replace(/[^a-z0-9-_]+/gi, '_').replace(/^_+|_+$/g, '');
+
+      const lines = [];
+      lines.push('Dante Scavenger Hunt — Saved Work');
+      lines.push('Exported: ' + ts);
+      lines.push('');
+      lines.push('Team Name: ' + (teamName || '(none)'));
+      lines.push('Team Members: ' + (teamMembers || '(none)'));
+      lines.push('');
+
+      document.querySelectorAll('.realm').forEach((realm) => {
+        const rnum = realm.dataset.realm || '';
+        const rtitle = realm.querySelector('.realm-title h3')?.textContent?.trim() || '';
+        lines.push(`Realm ${rnum} — ${rtitle}`);
+        lines.push('Tasks:');
+        realm.querySelectorAll('.task').forEach((task) => {
+          const cb = task.querySelector('.task-checkbox');
+          const id = cb?.dataset.task || '';
+          const checked = cb?.classList.contains('checked');
+          const ttitle = task.querySelector('.task-title')?.textContent?.trim() || '';
+          lines.push(`  [${checked ? 'x' : ' '}] ${id} ${ttitle}`);
+        });
+        const evidence = realm.querySelector('.evidence-input')?.value || '';
+        lines.push('Evidence:');
+        lines.push(evidence ? '  ' + evidence.replace(/
+?
+/g, '
+  ') : '  (none)');
+        lines.push('');
+      });
+
+      lines.push('Puzzle Unlocked: ' + (gameState.puzzleUnlocked ? 'Yes' : 'No'));
+
+      const text = lines.join('
+');
+      const filename = `dante_scavenger_${safeTeam || 'team'}_${ts.replace(/[:.]/g, '-')}.txt`;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+    } catch {}
+      if (!stateStr) {
+        alert("No saved data to export yet.");
+        return;
+      }
+      const now = new Date();
+      const team = (document.getElementById("team-name").value || "team").trim();
+      const safeTeam = team.replace(/[^a-z0-9-_]+/gi, "_").replace(/^_+|_+$/g, "");
+      const ts = now.toISOString().replace(/[:.]/g, "-");
+      const filename = `dante_scavenger_${safeTeam || "team"}_${ts}.json`;
+      const blob = new Blob([stateStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
     }
 
     // ===== Realm + Progress =====
@@ -697,6 +776,12 @@
             location.reload();
           }
         });
+      }
+      
+      // Export data
+      const exportBtn = document.getElementById('export-btn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', exportStateToFile);
       }
 
       // Initial hydration
