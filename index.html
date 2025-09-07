@@ -156,6 +156,10 @@
     .evidence-input { width: 100%; min-height: 80px; padding: 10px; border: 2px solid #CD853F; border-radius: 5px; resize: vertical; font-family: inherit; font-size: 14px; background: rgba(255, 248, 240, 0.9); }
     .evidence-input:focus { outline: none; border-color: #8B4513; box-shadow: 0 0 5px rgba(139, 69, 19, 0.3); }
 
+    /* Better click targets for tasks */
+    .task { cursor: pointer; }
+    .task .evidence-section, .evidence-input { cursor: text; }
+
     /* Puzzle */
     .puzzle-section { margin-top: 30px; padding: 25px; background: rgba(139, 69, 19, 0.1); border: 3px solid #8B4513; border-radius: 15px; text-align: center; opacity: 0.5; transition: all 0.5s ease; }
     .puzzle-section.unlocked { opacity: 1; background: rgba(34,139,34,0.1); border-color: #228B22; }
@@ -708,23 +712,34 @@
 
     // ===== Boot =====
     document.addEventListener('DOMContentLoaded', () => {
-      // Attach handlers to tasks
-      document.querySelectorAll('.task-checkbox').forEach((checkbox) => {
-        checkbox.addEventListener('click', () => {
-          toggleTaskCheckbox(checkbox);
-          checkRealmCompletion();
-          updateProgress();
-          checkPuzzleUnlock();
-          saveState();
-        });
-        checkbox.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleTaskCheckbox(checkbox);
-            checkRealmCompletion();
-            updateProgress();
-            checkPuzzleUnlock();
-            saveState();
+      // Attach handlers to tasks (event delegation for reliability)
+      function handleToggleFrom(el) {
+        const box = el.closest('.task-checkbox');
+        if (!box) return;
+        toggleTaskCheckbox(box);
+        checkRealmCompletion();
+        updateProgress();
+        checkPuzzleUnlock();
+        saveState();
+      }
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.task-checkbox')) {
+          handleToggleFrom(e.target);
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.target.closest('.task-checkbox') && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          handleToggleFrom(e.target);
+        }
+      });
+      // Also allow clicking anywhere on the task row (except controls/inputs) to toggle
+      document.querySelectorAll('.task').forEach((row) => {
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('textarea, a, button, input, select')) return;
+          if (!e.target.closest('.task-checkbox')) {
+            const cb = row.querySelector('.task-checkbox');
+            if (cb) handleToggleFrom(cb);
           }
         });
       });
